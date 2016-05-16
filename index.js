@@ -12,6 +12,7 @@ var client = new Twitter({
 * number of tweets per second depends on topic popularity
 **/
 var io = require('socket.io')();
+io.set('origins', 'https://pierrez.github.io/GoogleIOExtended-front');
 io.on('connection', function (socket) {
   console.log('connection');
 
