@@ -22,7 +22,8 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
 // Streaming Twitter
-twitter.stream('statuses/filter', {track: '#ioextendedbrest'},  function(stream){
+//twitter.stream('statuses/filter', {track: '#ioextendedbrest'},  function(stream){
+twitter.stream('statuses/filter', {track: '#Eurovision'},  function(stream){
   stream.on('data', function(tweet) {
     console.log("new tweet!")
     tweets.unshift(tweet);
@@ -41,7 +42,9 @@ twitter.stream('statuses/filter', {track: '#ioextendedbrest'},  function(stream)
 
 // New client
 io.on('connection', function(){
+  console.log("New connection")
   for (var i = 0; i < tweets.length; i++) {
+    console.log("pushing cached tweet " + i)
     io.emit('tweet', tweets[i])
   }
 });
