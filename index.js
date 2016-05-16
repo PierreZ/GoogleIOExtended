@@ -24,6 +24,7 @@ var io = require('socket.io')(server);
 // Streaming Twitter
 twitter.stream('statuses/filter', {track: '#ioextendedbrest'},  function(stream){
   stream.on('data', function(tweet) {
+    console.log("new tweet!")
     tweets.unshift(tweet);
 
     // Checking size of buffer and purge it if necessary
