@@ -1,5 +1,4 @@
 var Twitter = require('twitter');
-var io = require('socket.io')(8080);
 
 var client = new Twitter({
   consumer_key: process.env.TWITTER_CONSUMER_KEY,
@@ -9,10 +8,17 @@ var client = new Twitter({
 });
 
 /**
- * Stream statuses filtered by keyword
- * number of tweets per second depends on topic popularity
- **/
-client.stream('statuses/filter', {track: 'ioextendedbrest'},  function(stream){
+* Stream statuses filtered by keyword
+* number of tweets per second depends on topic popularity
+**/
+var io = require('socket.io')();
+io.on('connection', function (socket) {
+  console.log('connection');
+
+});
+io.listen(8080);
+console.log("started")
+client.stream('statuses/filter', {track: '#ioextendedbrest'},  function(stream){
   stream.on('data', function(tweet) {
     console.log(tweet);
     console.log(tweet.text);
@@ -25,6 +31,6 @@ client.stream('statuses/filter', {track: 'ioextendedbrest'},  function(stream){
 });
 // Kill process if we need it
 process.on('SIGINT', function(){
-    process.stdout.write('\n end \n');
-    process.exit();
+  process.stdout.write('\n end \n');
+  process.exit();
 });
