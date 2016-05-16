@@ -11,25 +11,31 @@ var client = new Twitter({
 * Stream statuses filtered by keyword
 * number of tweets per second depends on topic popularity
 **/
-var io = require('socket.io')();
-io.set('origins', 'https://pierrez.github.io/GoogleIOExtended-front');
-io.on('connection', function (socket) {
-  console.log('connection');
-
+var app = require('express')();
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
 });
-io.listen(8080);
+
+var server = require('http').createServer(app);
+var io = require('socket.io')(server);
+io.on('connection', function(){
+
+  // Streaming Twitter
+  client.stream('statuses/filter', {track: '#ioextendedbrest'},  function(stream){
+    stream.on('data', function(tweet) {
+      io.emit('tweet', tweet);
+    });
+    stream.on('error', function(error) {
+      console.log(error);
+    });
+  });
+});
 console.log("started")
-client.stream('statuses/filter', {track: '#ioextendedbrest'},  function(stream){
-  stream.on('data', function(tweet) {
-    console.log(tweet);
-    console.log(tweet.text);
-    io.emit('tweet', tweet);
-  });
+server.listen(8080);
 
-  stream.on('error', function(error) {
-    console.log(error);
-  });
-});
+
 // Kill process if we need it
 process.on('SIGINT', function(){
   process.stdout.write('\n end \n');
