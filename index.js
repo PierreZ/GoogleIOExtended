@@ -1,6 +1,6 @@
 var Twitter = require('twitter');
-
-var client = new Twitter({
+var tweets = [];
+var twitter = new Twitter({
   consumer_key: process.env.TWITTER_CONSUMER_KEY,
   consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
   access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
@@ -20,18 +20,31 @@ app.use(function(req, res, next) {
 
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
-io.on('connection', function(){
 
-  // Streaming Twitter
-  client.stream('statuses/filter', {track: '#ioextendedbrest'},  function(stream){
-    stream.on('data', function(tweet) {
-      io.emit('tweet', tweet);
-    });
-    stream.on('error', function(error) {
-      console.log(error);
-    });
+// Streaming Twitter
+twitter.stream('statuses/filter', {track: '#ioextendedbrest'},  function(stream){
+  stream.on('data', function(tweet) {
+    tweets.unshift(tweet);
+
+    // Checking size of buffer and purge it if necessary
+    if(tweets.length > 50) {
+      tweets.push(50,1)
+    }
+    // Fire event
+    io.emit('tweet', tweet);
+  });
+  stream.on('error', function(error) {
+    console.log(error);
   });
 });
+
+// New client
+io.on('connection', function(){
+  for (var i = 0; i < tweets.length; i++) {
+    io.emit('tweet', tweets[i])
+  }
+});
+
 console.log("started")
 server.listen(8080);
 
