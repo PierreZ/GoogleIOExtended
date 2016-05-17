@@ -29,8 +29,9 @@ twitter.stream('statuses/filter', {track: '#ioextendedbrest'},  function(stream)
     tweets.push(tweet);
 
     // Checking size of buffer and purge it if necessary
-    if(tweets.length > 50) {
-      tweets.push(50,1)
+    if(tweets.length > 100) {
+      // The shift() method removes the first element from an array
+      tweets.shift()
     }
     // Fire event
     io.emit('tweet', tweet);
