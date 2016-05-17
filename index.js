@@ -23,10 +23,10 @@ var io = require('socket.io')(server);
 
 // Streaming Twitter
 twitter.stream('statuses/filter', {track: '#ioextendedbrest'},  function(stream){
-//twitter.stream('statuses/filter', {track: '#Eurovision'},  function(stream){
+  //twitter.stream('statuses/filter', {track: '#Eurovision'},  function(stream){
   stream.on('data', function(tweet) {
     console.log("new tweet!")
-    tweets.unshift(tweet);
+    tweets.push(tweet);
 
     // Checking size of buffer and purge it if necessary
     if(tweets.length > 50) {
@@ -41,12 +41,15 @@ twitter.stream('statuses/filter', {track: '#ioextendedbrest'},  function(stream)
 });
 
 // New client
-io.on('connection', function(){
-  console.log("New connection")
+io.on('connection', function(socket){
+  console.info('New client connected (id=' + socket.id + ').');
+
+  // Push cached
   for (var i = 0; i < tweets.length; i++) {
     console.log("pushing cached tweet " + i)
-    io.emit('tweet', tweets[i])
+    socket.emit('tweet', tweets[i])
   }
+
 });
 
 console.log("started")
